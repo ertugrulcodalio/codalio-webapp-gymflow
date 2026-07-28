@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_07_28_190209) do
+ActiveRecord::Schema[8.0].define(version: 2026_07_28_190308) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -73,6 +73,28 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_28_190209) do
     t.index ["reset_password_token"], name: "index_admin_users_on_reset_password_token", unique: true
   end
 
+  create_table "bookings", force: :cascade do |t|
+    t.integer "status", default: 0, null: false
+    t.integer "attendance_status", default: 0, null: false
+    t.bigint "organization_id", null: false
+    t.bigint "user_id", null: false
+    t.bigint "gym_class_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["gym_class_id"], name: "index_bookings_on_gym_class_id"
+    t.index ["organization_id"], name: "index_bookings_on_organization_id"
+    t.index ["user_id"], name: "index_bookings_on_user_id"
+  end
+
+  create_table "branding_settings", force: :cascade do |t|
+    t.string "logo_url"
+    t.string "primary_color"
+    t.bigint "organization_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organization_id"], name: "index_branding_settings_on_organization_id"
+  end
+
   create_table "friendly_id_slugs", force: :cascade do |t|
     t.string "slug", null: false
     t.integer "sluggable_id", null: false
@@ -83,6 +105,32 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_28_190209) do
     t.index ["slug", "sluggable_type"], name: "index_friendly_id_slugs_on_slug_and_sluggable_type"
     t.index ["sluggable_id"], name: "index_friendly_id_slugs_on_sluggable_id"
     t.index ["sluggable_type"], name: "index_friendly_id_slugs_on_sluggable_type"
+  end
+
+  create_table "gym_classes", force: :cascade do |t|
+    t.string "name", null: false
+    t.text "description"
+    t.datetime "start_time"
+    t.datetime "end_time"
+    t.integer "capacity"
+    t.integer "status", default: 0, null: false
+    t.bigint "organization_id", null: false
+    t.bigint "trainer_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organization_id"], name: "index_gym_classes_on_organization_id"
+    t.index ["trainer_id"], name: "index_gym_classes_on_trainer_id"
+  end
+
+  create_table "membership_plans", force: :cascade do |t|
+    t.string "name", null: false
+    t.text "description"
+    t.float "price"
+    t.integer "status", default: 0, null: false
+    t.bigint "organization_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organization_id"], name: "index_membership_plans_on_organization_id"
   end
 
   create_table "organizations", force: :cascade do |t|
@@ -239,6 +287,16 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_28_190209) do
     t.index ["key"], name: "index_solid_queue_semaphores_on_key", unique: true
   end
 
+  create_table "trainers", force: :cascade do |t|
+    t.string "name", null: false
+    t.text "bio"
+    t.integer "status", default: 0, null: false
+    t.bigint "organization_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organization_id"], name: "index_trainers_on_organization_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "provider", default: "email", null: false
     t.string "uid", default: "", null: false
@@ -301,12 +359,20 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_28_190209) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "bookings", "gym_classes"
+  add_foreign_key "bookings", "organizations"
+  add_foreign_key "bookings", "users"
+  add_foreign_key "branding_settings", "organizations"
+  add_foreign_key "gym_classes", "organizations"
+  add_foreign_key "gym_classes", "trainers"
+  add_foreign_key "membership_plans", "organizations"
   add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_claimed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_failed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_ready_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_recurring_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_scheduled_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
+  add_foreign_key "trainers", "organizations"
   add_foreign_key "users_role_invites", "organizations"
   add_foreign_key "users_role_invites", "roles"
   add_foreign_key "users_roles", "organizations"
