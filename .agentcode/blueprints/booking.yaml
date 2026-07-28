@@ -1,0 +1,52 @@
+model: Booking
+slug: bookings
+table: bookings
+
+options:
+  belongs_to_organization: true
+  soft_deletes: false
+  audit_trail: false
+  pagination: true
+  per_page: 25
+
+columns:
+  status:
+    type: integer
+    default: 0
+    nullable: false
+    filterable: true
+  attendance_status:
+    type: integer
+    default: 0
+    nullable: false
+    filterable: true
+  user_id:
+    type: foreignId
+    foreign_model: User
+    nullable: false
+    index: true
+  gym_class_id:
+    type: foreignId
+    foreign_model: GymClass
+    nullable: false
+    index: true
+
+relationships:
+  - type: belongsTo
+    model: Organization
+  - type: belongsTo
+    model: User
+  - type: belongsTo
+    model: GymClass
+
+permissions:
+  gym_staff:
+    actions: [index, show, store, update, destroy]
+    show_fields: "*"
+    create_fields: "*"
+    update_fields: "*"
+  gym_member:
+    actions: [index, show, store, update, destroy]
+    show_fields: [id, status, attendance_status, user_id, gym_class_id]
+    create_fields: [gym_class_id]
+    update_fields: [status]

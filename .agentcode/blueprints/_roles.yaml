@@ -1,0 +1,7 @@
+roles:
+  gym_staff:
+    name: Gym Staff
+    description: "Full administrative access to manage plans, trainers, classes, and bookings."
+  gym_member:
+    name: Gym Member
+    description: "Registered gym member who can browse classes, book sessions, and manage their own bookings."

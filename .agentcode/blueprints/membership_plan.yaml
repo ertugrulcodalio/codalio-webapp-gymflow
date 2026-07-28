@@ -1,0 +1,46 @@
+model: MembershipPlan
+slug: membership_plans
+table: membership_plans
+
+options:
+  belongs_to_organization: true
+  soft_deletes: false
+  audit_trail: false
+  pagination: true
+  per_page: 25
+
+columns:
+  name:
+    type: string
+    nullable: false
+    searchable: true
+    filterable: true
+    sortable: true
+  description:
+    type: text
+    nullable: true
+    searchable: true
+  price:
+    type: float
+    nullable: true
+  status:
+    type: integer
+    default: 0
+    nullable: false
+    filterable: true
+
+relationships:
+  - type: belongsTo
+    model: Organization
+
+permissions:
+  gym_staff:
+    actions: [index, show, store, update, destroy]
+    show_fields: "*"
+    create_fields: "*"
+    update_fields: "*"
+  gym_member:
+    actions: [index, show]
+    show_fields: [id, name, description, price, status]
+    create_fields: []
+    update_fields: []

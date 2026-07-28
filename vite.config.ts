@@ -5,6 +5,7 @@ import { RhinoProjectVite } from '@rhino-project/vite-plugin-rhino';
 import ViteRails from 'vite-plugin-rails';
 import { exec } from 'child_process';
 import { promisify } from 'util';
+import path from 'path';
 
 const execAsync = promisify(exec);
 
@@ -40,30 +41,7 @@ export default defineConfig(async ({ mode }) => {
     ? { clientPort: Number(env.VITE_RUBY_HMR_CLIENT_PORT) }
     : {};
 
-  // Only load TanStackRouterVite when not running tests to avoid version mismatch issues
-  // Check multiple environment variables to detect test mode
-  const isTest = 
-    process.env.VITEST !== undefined || 
-    process.env.NODE_ENV === 'test' || 
-    process.env.RAILS_ENV === 'test' ||
-    mode === 'test';
-
-  // Conditionally load TanStack Router plugin, with error handling for test environments
-  let tanStackRouterPlugin = null;
-  if (!isTest) {
-    try {
-      const routerPlugin = await import('@tanstack/router-plugin/vite');
-      tanStackRouterPlugin = routerPlugin.TanStackRouterVite();
-    } catch (error) {
-      // Silently fail in test environments or if plugin is unavailable
-      if (process.env.NODE_ENV !== 'test' && process.env.RAILS_ENV !== 'test') {
-        console.warn('Failed to load TanStack Router plugin:', error);
-      }
-    }
-  }
-
   const plugins = [
-    ...(tanStackRouterPlugin ? [tanStackRouterPlugin] : []),
     ViteRails(),
     RhinoProjectVite({ enableJsxInJs: false }),
     react(),
@@ -73,6 +51,10 @@ export default defineConfig(async ({ mode }) => {
 
   return {
     resolve: {
+      alias: {
+        'rhino.config': path.resolve(__dirname, 'app/frontend/rhino.config.jsx'),
+        'models/static': path.resolve(__dirname, 'app/frontend/models/static.js')
+      },
       dedupe: ['@heroui/react']
     },
 

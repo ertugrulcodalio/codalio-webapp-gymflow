@@ -50,3 +50,11 @@ node_modules
 # https://vitejs.dev/guide/env-and-mode.html#env-files
 *.local
 
+
+# OpenHands / Codalio orchestrator metadata — do not push
+/.rhino-history
+/.rhino-plan.md
+/.rhino-review.md
+/.codalio
+/.openhands-state
+/TASKS.json

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_07_28_190308) do
+ActiveRecord::Schema[8.0].define(version: 2026_07_28_191220) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -329,9 +329,11 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_28_190308) do
     t.integer "invitation_limit"
     t.integer "invited_by_id"
     t.string "invited_by_type"
+    t.bigint "membership_plan_id"
     t.index ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["invitation_token"], name: "index_users_on_invitation_token", unique: true
+    t.index ["membership_plan_id"], name: "index_users_on_membership_plan_id"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["uid", "provider"], name: "index_users_on_uid_and_provider", unique: true
   end
@@ -373,6 +375,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_28_190308) do
   add_foreign_key "solid_queue_recurring_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_scheduled_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "trainers", "organizations"
+  add_foreign_key "users", "membership_plans"
   add_foreign_key "users_role_invites", "organizations"
   add_foreign_key "users_role_invites", "roles"
   add_foreign_key "users_roles", "organizations"

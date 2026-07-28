@@ -1,0 +1,65 @@
+model: GymClass
+slug: gym_classes
+table: gym_classes
+
+options:
+  belongs_to_organization: true
+  soft_deletes: false
+  audit_trail: false
+  pagination: true
+  per_page: 25
+
+columns:
+  name:
+    type: string
+    nullable: false
+    searchable: true
+    filterable: true
+    sortable: true
+  description:
+    type: text
+    nullable: true
+    searchable: true
+  start_time:
+    type: datetime
+    nullable: true
+    filterable: true
+    sortable: true
+  end_time:
+    type: datetime
+    nullable: true
+    filterable: true
+    sortable: true
+  capacity:
+    type: integer
+    nullable: true
+  status:
+    type: integer
+    default: 0
+    nullable: false
+    filterable: true
+  trainer_id:
+    type: foreignId
+    foreign_model: Trainer
+    nullable: false
+    index: true
+
+relationships:
+  - type: belongsTo
+    model: Organization
+  - type: belongsTo
+    model: Trainer
+  - type: hasMany
+    model: Booking
+
+permissions:
+  gym_staff:
+    actions: [index, show, store, update, destroy]
+    show_fields: "*"
+    create_fields: "*"
+    update_fields: "*"
+  gym_member:
+    actions: [index, show]
+    show_fields: [id, name, description, start_time, end_time, capacity, status, trainer_id]
+    create_fields: []
+    update_fields: []

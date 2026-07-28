@@ -3,6 +3,11 @@
 Rails.application.routes.draw do
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
+  namespace :api do
+    post "ai/schedule_recommendations", to: "ai#schedule_recommendations"
+    post "ai/member_outreach", to: "ai#member_outreach"
+  end
+
   devise_for :admin_users, ActiveAdmin::Devise.config
 
   # We introspect the models to create the admin interface

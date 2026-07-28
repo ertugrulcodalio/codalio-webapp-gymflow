@@ -6,61 +6,167 @@ import {
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import FavIcon from './assets/images/favicon.png';
 import { Helmet } from 'react-helmet';
-import { NotFoundPage } from '@rhino-project/ui-heroui';
-import { RhinoProvider, useRhinoContext } from '@rhino-project/core';
+import { RhinoProvider } from '@rhino-project/core';
+import { useUser, useRoles } from '@rhino-project/core/hooks';
 import { RhinoDevTool } from '@rhino-project/ui-heroui';
-import {
-  RouterProvider,
-  createRouter,
-  NavigateOptions,
-  ToOptions
-} from '@tanstack/react-router';
+import { BrowserRouter, Route, Routes, Navigate, useParams } from 'react-router-dom';
+import { SidebarProvider } from './components/ui/sidebar';
+import { AppOwnerProvider } from './contexts/AppOwnerProvider';
 
-// Import the generated models
-import { components } from './models/models';
+// Import Pages
+import Layout from './components/Layout';
+import Landing from './pages/Landing';
+import TenantHome from './pages/TenantHome';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import MemberDashboard from './pages/MemberDashboard';
+import ClassSchedule from './pages/ClassSchedule';
+import MyBookings from './pages/MyBookings';
+import AdminDashboard from './pages/AdminDashboard';
+import MembershipPlans from './pages/MembershipPlans';
+import Trainers from './pages/Trainers';
+import AdminClasses from './pages/AdminClasses';
+import BookingsManagement from './pages/BookingsManagement';
+import BrandingCustomization from './pages/BrandingCustomization';
 
-declare module '@rhino-project/core' {
-  type SchemaToResource = {
-    [K in keyof components['schemas']]: components['schemas'][K];
-  };
-
-  interface Resources extends SchemaToResource {}
-}
-
-// Import the generated route tree
-import { routeTree } from './routeTree.gen';
-
-// Register the router instance for type safety
-declare module '@tanstack/react-router' {
-  interface Register {
-    router: typeof router;
+// Route Guards
+const AuthenticatedRoute = ({ children }) => {
+  const user = useUser();
+  const { gym_slug } = useParams();
+  if (!user) {
+    return <Navigate to={`/tenant/${gym_slug || 'apex-fitness'}/login`} replace />;
   }
-}
+  return children;
+};
 
-// Create a new router instance
-const router = createRouter({
-  routeTree,
-  defaultNotFoundComponent: NotFoundPage,
-  defaultPendingComponent: () => <div>Pending...</div>,
-  defaultPreload: 'intent',
-  scrollRestoration: true,
-  // This will be set after we wrap the app in an RhinoProvider
-  context: { rhino: undefined! }
-});
-
-// Add the router config to hero-ui provider
-declare module '@react-types/shared' {
-  interface RouterConfig {
-    href: ToOptions['to'];
-    routerOptions: Omit<NavigateOptions, keyof ToOptions>;
+const RoleProtectedRoute = ({ roles, children }) => {
+  const userRoles = useRoles();
+  const { gym_slug } = useParams();
+  const hasRole = roles.some(role => userRoles.includes(role));
+  if (!hasRole) {
+    if (userRoles.includes('gym_staff')) {
+      return <Navigate to={`/tenant/${gym_slug || 'apex-fitness'}/admin/dashboard`} replace />;
+    }
+    return <Navigate to={`/tenant/${gym_slug || 'apex-fitness'}/dashboard`} replace />;
   }
-}
+  return children;
+};
 
-// Render the app
 const RootUI = () => {
-  const rhino = useRhinoContext();
+  return (
+    <SidebarProvider>
+      <BrowserRouter>
+        <AppOwnerProvider>
+          <Routes>
+            <Route element={<Layout />}>
+              {/* Public Routes */}
+              <Route path="/" element={<Landing />} />
+              <Route path="/tenant/:gym_slug" element={<TenantHome />} />
+              <Route path="/tenant/:gym_slug/login" element={<Login />} />
+              <Route path="/tenant/:gym_slug/register" element={<Register />} />
 
-  return <RouterProvider router={router} context={{ rhino }} />;
+              {/* Member Routes */}
+              <Route
+                path="/tenant/:gym_slug/dashboard"
+                element={
+                  <AuthenticatedRoute>
+                    <RoleProtectedRoute roles={['gym_member']}>
+                      <MemberDashboard />
+                    </RoleProtectedRoute>
+                  </AuthenticatedRoute>
+                }
+              />
+              <Route
+                path="/tenant/:gym_slug/classes"
+                element={
+                  <AuthenticatedRoute>
+                    <RoleProtectedRoute roles={['gym_member']}>
+                      <ClassSchedule />
+                    </RoleProtectedRoute>
+                  </AuthenticatedRoute>
+                }
+              />
+              <Route
+                path="/tenant/:gym_slug/bookings"
+                element={
+                  <AuthenticatedRoute>
+                    <RoleProtectedRoute roles={['gym_member']}>
+                      <MyBookings />
+                    </RoleProtectedRoute>
+                  </AuthenticatedRoute>
+                }
+              />
+
+              {/* Admin Routes */}
+              <Route
+                path="/tenant/:gym_slug/admin/dashboard"
+                element={
+                  <AuthenticatedRoute>
+                    <RoleProtectedRoute roles={['gym_staff']}>
+                      <AdminDashboard />
+                    </RoleProtectedRoute>
+                  </AuthenticatedRoute>
+                }
+              />
+              <Route
+                path="/tenant/:gym_slug/admin/plans"
+                element={
+                  <AuthenticatedRoute>
+                    <RoleProtectedRoute roles={['gym_staff']}>
+                      <MembershipPlans />
+                    </RoleProtectedRoute>
+                  </AuthenticatedRoute>
+                }
+              />
+              <Route
+                path="/tenant/:gym_slug/admin/trainers"
+                element={
+                  <AuthenticatedRoute>
+                    <RoleProtectedRoute roles={['gym_staff']}>
+                      <Trainers />
+                    </RoleProtectedRoute>
+                  </AuthenticatedRoute>
+                }
+              />
+              <Route
+                path="/tenant/:gym_slug/admin/classes"
+                element={
+                  <AuthenticatedRoute>
+                    <RoleProtectedRoute roles={['gym_staff']}>
+                      <AdminClasses />
+                    </RoleProtectedRoute>
+                  </AuthenticatedRoute>
+                }
+              />
+              <Route
+                path="/tenant/:gym_slug/admin/bookings"
+                element={
+                  <AuthenticatedRoute>
+                    <RoleProtectedRoute roles={['gym_staff']}>
+                      <BookingsManagement />
+                    </RoleProtectedRoute>
+                  </AuthenticatedRoute>
+                }
+              />
+              <Route
+                path="/tenant/:gym_slug/admin/branding"
+                element={
+                  <AuthenticatedRoute>
+                    <RoleProtectedRoute roles={['gym_staff']}>
+                      <BrandingCustomization />
+                    </RoleProtectedRoute>
+                  </AuthenticatedRoute>
+                }
+              />
+
+              {/* Catch-all Wildcard Route */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Route>
+          </Routes>
+        </AppOwnerProvider>
+      </BrowserRouter>
+    </SidebarProvider>
+  );
 };
 
 const Root = () => {

@@ -1041,8 +1041,10 @@ const api = {
               "creatable": true,
               "updatable": true
             },
-            "nullable": true,
-            "type": "integer"
+            "nullable": false,
+            "type": "integer",
+            "minimum": 0,
+            "exclusiveMinimum": true
           },
           "status": {
             "x-rhino-attribute": {
@@ -1122,6 +1124,7 @@ const api = {
         },
         "required": [
           "name",
+          "capacity",
           "status",
           "organization",
           "trainer"
