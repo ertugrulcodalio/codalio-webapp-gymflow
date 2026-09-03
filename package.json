@@ -44,7 +44,7 @@
     "@radix-ui/react-navigation-menu": "1.1.4"
   },
   "devDependencies": {
-    "@faker-js/faker": "9.5.0",
+    "@faker-js/faker": "10.5.0",
     "@nabla/vite-plugin-eslint": "2.0.5",
     "@rhino-project/eslint-plugin-rhino": "0.26.0-beta.4",
     "@rhino-project/vite-plugin-rhino": "0.26.0-beta.4",
